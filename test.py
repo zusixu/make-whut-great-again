@@ -1,4 +1,5 @@
 import pandas as pd
+import numpy as np
 import matplotlib.pyplot as plt
 import statsmodels.api as sm
 import function as F
@@ -37,3 +38,14 @@ df2.value = df2.value.fillna(method='bfill')
 
 F.draw_trend(df2.value,12)
 print(F.stationarity(df2.value))
+
+df2value_log = np.log(df2.value)
+print(F.stationarity(df2value_log))
+
+plt.subplot(211)
+plt.plot(df2.value, label=u'原始数据')
+plt.legend(loc='best')
+plt.subplot(212)
+plt.plot(df2value_log, label=u'取对数后')
+plt.legend(loc='best')
+plt.show()
