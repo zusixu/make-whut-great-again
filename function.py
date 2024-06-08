@@ -14,17 +14,23 @@ def Remove_outliers(data):
 
     return cleaned_data
 
-# 定义模型函数，例如，三次函数(可修改)
-def model_func(x, a, b, c, d):
+# 定义模型函数f，例如，三次函数(可修改)
+def f(x, a, b, c, d):
     return a * x**3 + b * x**2 + c * x + d
-def derivative_model_func(x, a, b, c, d):
+
+# 定义模型函数f的导数derivative_f
+def derivative_f(x, a, b, c, d):
     return 3 * a * x**2 + 2 * b * x + c
 
-# 定义目标函数 g(t)
-def g(t, x_value, delta_y, a, b, c, d):
+# 定义目标函数 pso_goal(t)
+def pso_goal(t, x_value, delta_y, a, b, c, d):
     g_val = 0
     for i in range(len(x_value)):
         xi = x_value[i]
         delta_y_i = delta_y[i]
-        g_val += (model_func(xi, a, b, c, d) - model_func(xi - t, a, b, c, d) - delta_y_i)**2
+        g_val += (f(xi, a, b, c, d) - f(xi - t, a, b, c, d) - delta_y_i)**2
     return g_val
+
+# 定义函数gx
+def gx(x, k, x0):
+    return k * (x - x0)

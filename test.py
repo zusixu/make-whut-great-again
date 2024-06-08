@@ -36,9 +36,9 @@ age_x = np.array(age_x)
 age_y = np.array(age_y)
 
 # 用数据拟合模型
-age_params, age_params_covariance = curve_fit(F.model_func, age_x, age_y)
+age_params, age_params_covariance = curve_fit(F.f, age_x, age_y)
 age_x_fit = np.linspace(min(age_x), max(age_x), 100)
-age_y_fit = F.model_func(age_x_fit, *age_params)
+age_y_fit = F.f(age_x_fit, *age_params)
 
 # 画出数据点和拟合曲线
 plt.scatter(age_x, age_y, label='老化数据(y轴为: 累计维护高度+每段数据y值)', color='lightblue')
@@ -71,7 +71,7 @@ x_value = [data_segments[i].iloc[0, 0] for i in [1, 2, 4, 5, 8]]
 lb = [0]  # t 的下界
 ub = [1000]  # t 的上界（根据实际情况调整）
 
-optimal_t, optimal_g = pso(lambda t: F.g(t, x_value, delta_y, *age_params), lb, ub)
+optimal_t, optimal_g = pso(lambda t: F.pso_goal(t, x_value, delta_y, *age_params), lb, ub)
 print('使用PSO算法求解最优回退时间与最小误差')
 print('最优回退时间', optimal_t, '最优误差', optimal_g)
 print('===============================================')
@@ -105,8 +105,8 @@ plt.show()
 # 下面计算拟合曲线在3, 6, 9, 10段的末尾点的斜率(直接代入末尾点的x坐标算就行), 前面拟合的是4, 7, 10, 11起始点的局部斜率(取了30个点)
 data_3_end_x = data_segments[2].iloc[-1,0]; data_6_end_x = data_segments[5].iloc[-1,0]
 data_9_end_x = data_segments[8].iloc[-1,0]; data_10_end_x = data_segments[9].iloc[-1,0]
-data_3_end_slope = F.derivative_model_func(data_3_end_x, *age_params); data_6_end_slope = F.derivative_model_func(data_6_end_x, *age_params)
-data_9_end_slope = F.derivative_model_func(data_9_end_x, *age_params); data_10_end_slope = F.derivative_model_func(data_10_end_x, *age_params)
+data_3_end_slope = F.derivative_f(data_3_end_x, *age_params); data_6_end_slope = F.derivative_f(data_6_end_x, *age_params)
+data_9_end_slope = F.derivative_f(data_9_end_x, *age_params); data_10_end_slope = F.derivative_f(data_10_end_x, *age_params)
 
 # 画出数据点和拟合曲线
 plt.scatter(age_x, age_y, label='老化数据(y轴为: 累计维护高度+每段数据y值)', color='lightblue')
@@ -114,7 +114,7 @@ plt.plot(age_x_fit, age_y_fit, color='black', label='老化拟合曲线')
 
 # 绘制这四点和它们的导数
 points_x = [data_3_end_x, data_6_end_x, data_9_end_x, data_10_end_x]
-points_y = [F.model_func(x, *age_params) for x in points_x]
+points_y = [F.f(x, *age_params) for x in points_x]
 slopes = [data_3_end_slope, data_6_end_slope, data_9_end_slope, data_10_end_slope]
 
 for (px, py, slope) in zip(points_x, points_y, slopes):
@@ -142,15 +142,15 @@ print('===============================================')
 # 先计算 k原始, 例如: 将第4段的datasize(30)个数的x坐标带入拟合函数中, 计算拟合函数分别在这datasize(30)个座标处的导数值(斜率)
 # 首先针对第4(7, 10, 11)段前30个数据，计算每一个数据在拟合曲线(三次函数)上对应点的导数值(斜率)
 # 第4(7, 10, 11)段, 注意: 我们在前面已经设置好datasize = 30
-slope_memory = [[], [], [], []]
 abnormal_data = [3, 6, 9, 10]
+slope_memory = [[] for i in range(len(abnormal_data))]
 for num, segment in enumerate(abnormal_data):
     for i in range(datasize):
         # 首先得到每一个点的x坐标
         x = data_segments[segment].iloc[i,0]
         # 然后利用function函数中的derivative_model_func, 计算这一点在拟合曲线上的导数
         # 注意: 利用前面得到的arg——params作为参数计算即可
-        slope = F.derivative_model_func(x, *age_params)
+        slope = F.derivative_f(x, *age_params)
         slope_memory[num].append(slope)
 
 # 下面计算 k_{mean}
@@ -167,8 +167,40 @@ print('===============================================')
 # 下面计算 g(x), 公式如'figure/部分计算公式所示.png'所示
 # 先算 g4(x), abnormal_data = [3, 6, 9, 10]
 # 建立g列表
-g = [[], [], [], []]
+g = [[] for i in range(len(k_mean))]
 for num, segment in enumerate(abnormal_data):
-    gx = k_mean[0] * (data_segments[segment].iloc[:,0] - data_segments[segment].iloc[0,0])
+    gx = F.gx(data_segments[segment].iloc[:,0], k_mean[num], data_segments[segment].iloc[0,0])
     g[num].append(gx)
+print('g(x)')
 print(g)
+print('===============================================')
+
+# 下面计算10个h(x)
+# 首先计算f(x-delta_x), 其中delta_x即为前面通过PSO算法求得的回退时间, optimal_t, f为拟合曲线
+# 建立10段曲线的集合
+interval = [1, 2, 3, 4 ,5 ,6, 7, 8, 9, 10]
+# 建立用于存放10个h(x)的列表, 注意, h(x)列表中的第一个列表存放的是第2段的h(x), 因为维护是从第2段开始的
+# 注意：虽然维护是从第2段开始的，但是interval中第一个数为1, 这是因为第1段为0
+h = [[] for i in range(len(interval))]
+for num, segment in enumerate(interval):
+    x = data_segments[segment].iloc[:,0]
+    if segment == 3 or segment == 6 or segment == 9 or segment == 10:
+        if segment == 3:
+            h[num] = F.f(x - optimal_t, *age_params) - F.f(x, *age_params) - F.gx(x, k_mean[0], data_segments[segment].iloc[0, 0])
+        elif segment == 6:
+            h[num] = F.f(x - optimal_t, *age_params) - F.f(x, *age_params) - F.gx(x, k_mean[1], data_segments[segment].iloc[0, 0])
+        elif segment == 9:
+            h[num] = F.f(x - optimal_t, *age_params) - F.f(x, *age_params) - F.gx(x, k_mean[2], data_segments[segment].iloc[0, 0])
+        elif segment == 10:
+            h[num] = F.f(x - optimal_t, *age_params) - F.f(x, *age_params) - F.gx(x, k_mean[3], data_segments[segment].iloc[0, 0])
+    else:
+        h[num] = F.f(x - optimal_t, *age_params) - F.f(x, *age_params) - 0
+
+print('h(x)')
+print(h[0])
+print('===============================================')
+
+# 下面计算e(x)
+
+
+
