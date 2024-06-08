@@ -175,32 +175,34 @@ print('g(x)')
 print(g)
 print('===============================================')
 
-# 下面计算10个h(x)
+# 下面计算11个e(x)
 # 首先计算f(x-delta_x), 其中delta_x即为前面通过PSO算法求得的回退时间, optimal_t, f为拟合曲线
-# 建立10段曲线的集合
-interval = [1, 2, 3, 4 ,5 ,6, 7, 8, 9, 10]
-# 建立用于存放10个h(x)的列表, 注意, h(x)列表中的第一个列表存放的是第2段的h(x), 因为维护是从第2段开始的
-# 注意：虽然维护是从第2段开始的，但是interval中第一个数为1, 这是因为第1段为0
-h = [[] for i in range(len(interval))]
+# 建立11段曲线的集合
+interval = [0, 1, 2, 3, 4 ,5 ,6, 7, 8, 9, 10]
+# 建立用于存放11个h(x)的列表, 注意, h(x)列表中的第一个列表h[0] = 0, 代表第一段为0
+# 注意：维护是从第2段开始的
+e = []
 for num, segment in enumerate(interval):
     x = data_segments[segment].iloc[:,0]
     if segment == 3 or segment == 6 or segment == 9 or segment == 10:
         if segment == 3:
-            h[num] = F.f(x - optimal_t, *age_params) - F.f(x, *age_params) - F.gx(x, k_mean[0], data_segments[segment].iloc[0, 0])
+            e.append(F.f(x - segment * optimal_t, *age_params) + F.gx(x, k_mean[0], data_segments[segment].iloc[0, 0]))
         elif segment == 6:
-            h[num] = F.f(x - optimal_t, *age_params) - F.f(x, *age_params) - F.gx(x, k_mean[1], data_segments[segment].iloc[0, 0])
+            e.append(F.f(x - segment * optimal_t, *age_params) + F.gx(x, k_mean[1], data_segments[segment].iloc[0, 0]))
         elif segment == 9:
-            h[num] = F.f(x - optimal_t, *age_params) - F.f(x, *age_params) - F.gx(x, k_mean[2], data_segments[segment].iloc[0, 0])
+            e.append(F.f(x - segment * optimal_t, *age_params) + F.gx(x, k_mean[2], data_segments[segment].iloc[0, 0]))
         elif segment == 10:
-            h[num] = F.f(x - optimal_t, *age_params) - F.f(x, *age_params) - F.gx(x, k_mean[3], data_segments[segment].iloc[0, 0])
+            e.append(F.f(x - segment * optimal_t, *age_params) + F.gx(x, k_mean[3], data_segments[segment].iloc[0, 0]))
     else:
-        h[num] = F.f(x - optimal_t, *age_params) - F.f(x, *age_params) - 0
-
-print('h(x)')
-print(h[0])
+        e.append(F.f(x - segment * optimal_t, *age_params))
+print('e(x)')
+print(e)
 print('===============================================')
 
-# 下面计算e(x)
-
-
-
+for i, segment in enumerate(interval):
+    plt.scatter(data_segments[segment]['时间'], data_segments[segment]['性能'], label=f'数据集{segment + 1}全部点', color='blue')
+    plt.plot(e[i].index[:], e[i].values, label=f'第{segment + 1}段的e曲线', color='black')
+plt.xlabel('时间'); plt.ylabel('性能')
+plt.legend()
+plt.savefig('figure/e(x).png')
+plt.show()
