@@ -14,7 +14,7 @@ data = pd.read_excel('data/C1.xlsx')
 
 # 第1~11个大段 (0~285)，并删除每段的离群点
 data_1 = data.iloc[0:287]; data_1 = data_1.dropna(); data_1 = F.Remove_outliers(data_1)
-data_2 = data.iloc[295:592]; data_2 = data_2.dropna(); data_2 = F.Remove_outliers(data_2)
+data_2 = data.iloc[293:592]; data_2 = data_2.dropna(); data_2 = F.Remove_outliers(data_2)
 data_3 = data.iloc[592:856]; data_3 = data_3.dropna(); data_3 = F.Remove_outliers(data_3)
 data_4 = data.iloc[860:1018]; data_4 = data_4.dropna(); data_4 = F.Remove_outliers(data_4)
 data_5 = data.iloc[1022:1251];data_5 = data_5.dropna();data_5 = F.Remove_outliers(data_5)
