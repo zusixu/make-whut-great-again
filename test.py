@@ -77,7 +77,9 @@ print('最优回退时间', optimal_t, '最优误差', optimal_g)
 print('===============================================')
 
 # 拟合第4, 7, 10, 11段的斜率，用局部的点来拟合
-local_segments = [data_segments[i].iloc[0:30] for i in [3, 6, 9, 10]]
+# datasize = 30, 即选取拟合局部导数的数据量大小
+datasize = 30
+local_segments = [data_segments[i].iloc[0:datasize] for i in [3, 6, 9, 10]]
 
 # 使用numpy进行线性拟合
 coefficients = [np.polyfit(segment['时间'], segment['性能'], 1) for segment in local_segments]
@@ -135,3 +137,38 @@ print(f'data_6_end_x = {data_6_end_x}, 斜率 = {data_6_end_slope}')
 print(f'data_9_end_x = {data_9_end_x}, 斜率 = {data_9_end_slope}')
 print(f'data_10_end_x = {data_10_end_x}, 斜率 = {data_10_end_slope}')
 print('===============================================')
+
+# 下面计算 k_{mean}, 计算如'figure/部分计算公式所示.png'所示
+# 先计算 k原始, 例如: 将第4段的datasize(30)个数的x坐标带入拟合函数中, 计算拟合函数分别在这datasize(30)个座标处的导数值(斜率)
+# 首先针对第4(7, 10, 11)段前30个数据，计算每一个数据在拟合曲线(三次函数)上对应点的导数值(斜率)
+# 第4(7, 10, 11)段, 注意: 我们在前面已经设置好datasize = 30
+slope_memory = [[], [], [], []]
+abnormal_data = [3, 6, 9, 10]
+for num, segment in enumerate(abnormal_data):
+    for i in range(datasize):
+        # 首先得到每一个点的x坐标
+        x = data_segments[segment].iloc[i,0]
+        # 然后利用function函数中的derivative_model_func, 计算这一点在拟合曲线上的导数
+        # 注意: 利用前面得到的arg——params作为参数计算即可
+        slope = F.derivative_model_func(x, *age_params)
+        slope_memory[num].append(slope)
+
+# 下面计算 k_{mean}
+k4_mean = 1 / (1018 - 860 + 1 -30) * (coefficients[0][0] * datasize - sum(slope_memory[0]))
+k7_mean = 1 / (1882 - 1724 + 1 -30) * (coefficients[1][0] * datasize - sum(slope_memory[1]))
+k10_mean = 1 / (2734 - 2539 + 1 -30) * (coefficients[2][0] * datasize - sum(slope_memory[2]))
+k11_mean = 1 / (2919 - 2738 + 1 -30) * (coefficients[3][0] * datasize - sum(slope_memory[3]))
+# 将四个k_mean存储到k_mean列表中
+k_mean = [k4_mean, k7_mean, k10_mean, k11_mean]
+print('四个k_mean')
+print('k4_mean', k_mean[0], 'k7_mean', k_mean[1], 'k10_mean', k_mean[2], 'k11_mean', k_mean[3])
+print('===============================================')
+
+# 下面计算 g(x), 公式如'figure/部分计算公式所示.png'所示
+# 先算 g4(x), abnormal_data = [3, 6, 9, 10]
+# 建立g列表
+g = [[], [], [], []]
+for num, segment in enumerate(abnormal_data):
+    gx = k_mean[0] * (data_segments[segment].iloc[:,0] - data_segments[segment].iloc[0,0])
+    g[num].append(gx)
+print(g)
