@@ -17,6 +17,8 @@ def Remove_outliers(data):
 # 定义模型函数，例如，三次函数(可修改)
 def model_func(x, a, b, c, d):
     return a * x**3 + b * x**2 + c * x + d
+def derivative_model_func(x, a, b, c, d):
+    return 3 * a * x**2 + 2 * b * x + c
 
 # 定义目标函数 g(t)
 def g(t, x_value, delta_y, a, b, c, d):
