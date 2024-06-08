@@ -12,6 +12,6 @@ def Remove_outliers(data):
 
     return cleaned_data
 
-# 定义模型函数，例如，二次函数
-def model_func(x, a, b, c):
-    return a * x**2 + b * x + c
+# 定义模型函数，例如，三次函数(可修改)
+def model_func(x, a, b, c, d):
+    return a * x**3 + b * x**2 + c * x + d
