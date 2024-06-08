@@ -176,6 +176,18 @@ print('g(x)')
 print(g)
 print('===============================================')
 
+# 下面计算10个h(x)
+interval = [0, 1, 2, 3, 4 ,5 ,6, 7, 8, 9, 10]
+h = []
+for num, segment in enumerate(interval):
+    if segment == 0:
+        h.append(0)
+    else:
+        x = data_segments[segment].iloc[0,0]
+        h.append(F.f(x,*age_params) - F.f(x - optimal_t, *age_params) + h[segment - 1])
+print('h(x)')
+print(h)
+
 # 下面计算11个e(x)
 # 首先计算f(x-delta_x), 其中delta_x即为前面通过PSO算法求得的回退时间, optimal_t, f为拟合曲线
 # 建立11段曲线的集合
@@ -187,15 +199,15 @@ for num, segment in enumerate(interval):
     x = data_segments[segment].iloc[:,0]
     if segment == 3 or segment == 6 or segment == 9 or segment == 10:
         if segment == 3:
-            e.append(F.f(x - segment * optimal_t, *age_params) + F.gx(x, k_mean[0], data_segments[segment].iloc[0, 0]))
+            e.append(F.f(x, *age_params) + F.gx(x, k_mean[0], data_segments[segment].iloc[0, 0]) - h[segment])
         elif segment == 6:
-            e.append(F.f(x - segment * optimal_t, *age_params) + F.gx(x, k_mean[1], data_segments[segment].iloc[0, 0]))
+            e.append(F.f(x, *age_params) + F.gx(x, k_mean[1], data_segments[segment].iloc[0, 0]) - h[segment])
         elif segment == 9:
-            e.append(F.f(x - segment * optimal_t, *age_params) + F.gx(x, k_mean[2], data_segments[segment].iloc[0, 0]))
+            e.append(F.f(x, *age_params) + F.gx(x, k_mean[2], data_segments[segment].iloc[0, 0]) - h[segment])
         elif segment == 10:
-            e.append(F.f(x - segment * optimal_t, *age_params) + F.gx(x, k_mean[3], data_segments[segment].iloc[0, 0]))
+            e.append(F.f(x, *age_params) + F.gx(x, k_mean[3], data_segments[segment].iloc[0, 0]) - h[segment])
     else:
-        e.append(F.f(x - segment * optimal_t, *age_params))
+        e.append(F.f(x, *age_params) - h[segment])
 print('e(x)')
 print(e)
 print('===============================================')
@@ -207,3 +219,4 @@ plt.xlabel('时间'); plt.ylabel('性能')
 plt.legend()
 plt.savefig('figure/e(x).png')
 plt.show()
+print('===============================================')
