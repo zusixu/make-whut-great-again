@@ -20,15 +20,16 @@ for segment in [(0, 287), (293, 592), (592, 856), (860, 1018), (1022, 1251), (12
     segment_data = F.Remove_outliers(segment_data)
     data_segments.append(segment_data)
 
-# 处理需要拟合的段（1, 2, 3, 5, 6, 9段）的数据
-age_x = np.concatenate([data_segments[i].iloc[:, 0] for i in [0, 1, 2, 4, 5, 8]])
+# 处理需要拟合的段（1, 2, 3, 5, 6, 8, 9段）的数据
+age_x = np.concatenate([data_segments[i].iloc[:, 0] for i in [0, 1, 2, 4, 5, 7, 8]])
 age_y = np.concatenate([
     data_segments[0].iloc[:, 1],
     data_segments[1].iloc[:, 1] + (data_segments[0].iloc[-1, 1] - data_segments[1].iloc[0, 1]),
     data_segments[2].iloc[:, 1] + (data_segments[0].iloc[-1, 1] - data_segments[1].iloc[0, 1] + data_segments[1].iloc[-1, 1] - data_segments[2].iloc[0, 1]),
     data_segments[4].iloc[:, 1] + (data_segments[0].iloc[-1, 1] - data_segments[1].iloc[0, 1] + data_segments[1].iloc[-1, 1] - data_segments[2].iloc[0, 1] + data_segments[2].iloc[-1, 1] - data_segments[4].iloc[0, 1]),
     data_segments[5].iloc[:, 1] + (data_segments[0].iloc[-1, 1] - data_segments[1].iloc[0, 1] + data_segments[1].iloc[-1, 1] - data_segments[2].iloc[0, 1] + data_segments[2].iloc[-1, 1] - data_segments[4].iloc[0, 1] + data_segments[4].iloc[-1, 1] - data_segments[5].iloc[0, 1]),
-    data_segments[8].iloc[:, 1] + (data_segments[0].iloc[-1, 1] - data_segments[1].iloc[0, 1] + data_segments[1].iloc[-1, 1] - data_segments[2].iloc[0, 1] + data_segments[2].iloc[-1, 1] - data_segments[4].iloc[0, 1] + data_segments[4].iloc[-1, 1] - data_segments[5].iloc[0, 1] + data_segments[5].iloc[-1, 1] - data_segments[8].iloc[0, 1])
+    data_segments[7].iloc[:, 1] + (data_segments[0].iloc[-1, 1] - data_segments[1].iloc[0, 1] + data_segments[1].iloc[-1, 1] - data_segments[2].iloc[0, 1] + data_segments[2].iloc[-1, 1] - data_segments[4].iloc[0, 1] + data_segments[4].iloc[-1, 1] - data_segments[5].iloc[0, 1] + data_segments[5].iloc[-1, 1] - data_segments[7].iloc[0, 1]),
+    data_segments[8].iloc[:, 1] + (data_segments[0].iloc[-1, 1] - data_segments[1].iloc[0, 1] + data_segments[1].iloc[-1, 1] - data_segments[2].iloc[0, 1] + data_segments[2].iloc[-1, 1] - data_segments[4].iloc[0, 1] + data_segments[4].iloc[-1, 1] - data_segments[5].iloc[0, 1] + data_segments[5].iloc[-1, 1] - data_segments[7].iloc[0, 1] + data_segments[7].iloc[-1, 1] - data_segments[8].iloc[0, 1])
 ])
 
 # 将数据转换为np.array
@@ -54,20 +55,20 @@ plt.show()
 # 计算每次维护后delta_x的位移量
 delta_x = [
     -(data_segments[i].iloc[-1, 0] - data_segments[i + 1].iloc[0, 0])
-    for i in [0, 1, 2, 4, 5]
+    for i in [0, 1, 2, 4, 5, 7]
 ]
-print('第1~2, 2~3, 3~5, 5~6, 6~9段位移量分别为')
+print('第1~2, 2~3, 3~5, 5~6, 6~8, 8~9段位移量分别为')
 print(delta_x)
 print('===============================================')
 
 # 计算回推的delta_t, 即delta_x
 delta_y = [
     data_segments[i].iloc[-1, 1] - data_segments[i + 1].iloc[0, 1]
-    for i in [0, 1, 2, 4, 5]
+    for i in [0, 1, 2, 4, 5, 7]
 ]
 
 # 用PSO算法求解最优的delta_t值
-x_value = [data_segments[i].iloc[0, 0] for i in [1, 2, 4, 5, 8]]
+x_value = [data_segments[i].iloc[0, 0] for i in [1, 2, 4, 5, 7, 8]]
 lb = [0]  # t 的下界
 ub = [1000]  # t 的上界（根据实际情况调整）
 
