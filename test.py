@@ -4,6 +4,7 @@ import matplotlib.pyplot as plt
 import function as F
 from scipy.interpolate import CubicSpline
 from scipy.optimize import curve_fit
+from pyswarm import pso
 # 设置字体
 from pylab import mpl
 mpl.rcParams['font.sans-serif']=['SimHei']
@@ -60,3 +61,31 @@ delta_x5_x6 = -(data_5.iloc[-1,0] - data_6.iloc[0,0])
 delta_x6_x9 = -(data_6.iloc[-1,0] - data_9.iloc[0,0])
 print('第1~2, 2~3, 3~5, 5~6, 6~9段位移量分别为')
 print(delta_x1_x2, '$$', delta_x2_x3, '$$',delta_x3_x5, '$$',delta_x5_x6, '$$',delta_x6_x9)
+print('===============================================')
+
+# 下面计算回推的delta_x, 例子: 首先计算第3段的末尾点和第5段的起始点的y坐标之差, 之后,将其映射到前面拟合好的f(x)中，从而计算delta_x
+# 具体计算方案请参考 'figure/每一段回推的delta_x的计算方式.png'
+# 这里要仔细考虑当前delta_y对应的坐标位置, 不能直接将delta_y带入, 而需要带入累计的 y坐标值+delta_y, 然后求反函数， 计算对应的delta_x
+
+# 首先计算 delta_y, 即第3段末尾与第5段起始点的y坐标之差
+delta_y1_y2 = data_1.iloc[-1,1] - data_2.iloc[0,1]
+delta_y2_y3 = data_2.iloc[-1,1] - data_3.iloc[0,1]
+delta_y3_y5 = data_3.iloc[-1,1] - data_5.iloc[0,1]
+delta_y5_y6 = data_5.iloc[-1,1] - data_6.iloc[0,1]
+delta_y6_y9 = data_6.iloc[-1,1] - data_9.iloc[0,1]
+#print(delta_y1_y2)
+
+# 用PSO算法求解最优的delta_t值
+x_value = [data_2.iloc[0,0], data_3.iloc[0,0], data_5.iloc[0,0], data_6.iloc[0,0], data_9.iloc[0,0]]
+delta_y = [delta_y1_y2, delta_y2_y3, delta_y3_y5, delta_y5_y6, delta_y6_y9]
+
+# 使用 PSO 进行优化
+lb = [0]  # t 的下界
+ub = [1000]  # t 的上界（根据实际情况调整）
+
+# 调用 PSO 进行优化
+optimal_t, optimal_g = pso(lambda t: F.g(t, x_value, delta_y, *age_params), lb, ub)
+print('使用PSO算法求解最优回退时间与最小误差')
+print('最优回退时间', optimal_t, '最优误差', optimal_g)
+print('===============================================')
+
