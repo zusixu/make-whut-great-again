@@ -50,3 +50,13 @@ plt.plot(age_x_fit, age_y_fit, color='blue', label='老化拟合曲线')
 plt.xlabel('X'); plt.ylabel('Y'); plt.legend()
 plt.savefig('figure/123569段数据清洗后拟合性能趋势图')
 plt.show()
+
+# 计算每次维护后delta_x的位移量(因为有6段数据，所以共5个位移量), 为了保证位移量为正，前面加上负号。
+# 例如对于3->5段的位移量: 计算方式为: delta_x3_x5 = -(第3段最后一点的x - 第5段第一点的x)
+delta_x1_x2 = -(data_1.iloc[-1,0] - data_2.iloc[0,0])
+delta_x2_x3 = -(data_2.iloc[-1,0] - data_3.iloc[0,0])
+delta_x3_x5 = -(data_3.iloc[-1,0] - data_5.iloc[0,0])
+delta_x5_x6 = -(data_5.iloc[-1,0] - data_6.iloc[0,0])
+delta_x6_x9 = -(data_6.iloc[-1,0] - data_9.iloc[0,0])
+print('第1~2, 2~3, 3~5, 5~6, 6~9段位移量分别为')
+print(delta_x1_x2, '$$', delta_x2_x3, '$$',delta_x3_x5, '$$',delta_x5_x6, '$$',delta_x6_x9)
