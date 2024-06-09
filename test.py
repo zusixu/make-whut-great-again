@@ -204,8 +204,15 @@ for num, segment in enumerate(interval):
 #print('===============================================')
 
 for i, segment in enumerate(interval):
-    plt.scatter(data_segments[segment]['时间'], data_segments[segment]['性能'], label=f'数据集{segment + 1}全部点', color='blue')
+    #plt.scatter(data_segments[segment]['时间'], data_segments[segment]['性能'], label=f'数据集{segment + 1}全部点', color='blue')
     plt.plot(e[i].index[:], e[i].values, label=f'第{segment + 1}段的e曲线', color='black')
+# 使用虚线画出对应的 x, y 坐标
+plt.plot([e[-1].index[-1], e[-1].index[-1]], [0, e[-1].values[-1]], 'r--', linewidth=1)
+plt.plot([0, e[-1].index[-1]], [e[-1].values[-1], e[-1].values[-1]], 'r--', linewidth=1)
+# 在 x 轴和 y 轴上标注对应坐标
+plt.annotate(f'({e[-1].index[-1]}, 0)', (e[-1].index[-1], 0), textcoords="offset points", xytext=(0, -10), ha='center', fontsize=8)
+plt.annotate(f'(0, {e[-1].values[-1]})', (0, e[-1].values[-1]), textcoords="offset points", xytext=(-30, 0), ha='center', fontsize=8)
+
 plt.xlabel('时间'); plt.ylabel('性能')
 # plt.legend()
 plt.savefig('figure/e(x).png')
@@ -223,8 +230,14 @@ Wuyichang = []
 for num, segment in enumerate(interval):
     x = data_segments[segment].iloc[:,0]
     Wuyichang.append(F.Wuyichangzhi(h, num, x, *age_params))
-    plt.scatter(data_segments[segment]['时间'], data_segments[segment]['性能'], label=f'数据集{segment + 1}全部点', color='blue')
+    #plt.scatter(data_segments[segment]['时间'], data_segments[segment]['性能'], label=f'数据集{segment + 1}全部点', color='blue')
     plt.plot(Wuyichang[num].index[:], Wuyichang[num].values, label=f'第{segment + 1}段的无异常曲线', color='black')
+# 使用虚线画出对应的 x, y 坐标
+plt.plot([Wuyichang[-1].index[-1], Wuyichang[-1].index[-1]], [0, Wuyichang[-1].values[-1]], 'r--', linewidth=1)
+plt.plot([0, Wuyichang[-1].index[-1]], [Wuyichang[-1].values[-1], Wuyichang[-1].values[-1]], 'r--', linewidth=1)
+# 在 x 轴和 y 轴上标注对应坐标
+plt.annotate(f'({Wuyichang[-1].index[-1]}, 0)', (Wuyichang[-1].index[-1], 0), textcoords="offset points", xytext=(0, -10), ha='center', fontsize=8)
+plt.annotate(f'(0, {Wuyichang[-1].values[-1]})', (0, Wuyichang[-1].values[-1]), textcoords="offset points", xytext=(-30, 0), ha='center', fontsize=8)
 plt.xlabel('时间'); plt.ylabel('性能')
 #plt.legend()
 plt.savefig('figure/无异常(f-h).png')
@@ -236,8 +249,15 @@ Wuweihu = []
 for num, segment in enumerate(interval):
     x = data_segments[segment].iloc[:,0]
     Wuweihu.append(F.Wuweihu(g, num, x, *age_params))
-    plt.scatter(data_segments[segment]['时间'], data_segments[segment]['性能'], label=f'数据集{segment + 1}全部点', color='blue')
+    #plt.scatter(data_segments[segment]['时间'], data_segments[segment]['性能'], label=f'数据集{segment + 1}全部点', color='blue')
     plt.plot(Wuweihu[num].index[:], Wuweihu[num].values, label=f'第{segment + 1}段的无维护曲线', color='black')
+# 使用虚线画出对应的 x, y 坐标
+plt.plot([Wuweihu[-1].index[-1], Wuweihu[-1].index[-1]], [0, Wuweihu[-1].values[-1]], 'r--', linewidth=1)
+plt.plot([0, Wuweihu[-1].index[-1]], [Wuweihu[-1].values[-1], Wuweihu[-1].values[-1]], 'r--', linewidth=1)
+# 在 x 轴和 y 轴上标注对应坐标
+plt.annotate(f'({Wuweihu[-1].index[-1]}, 0)', (Wuweihu[-1].index[-1], 0), textcoords="offset points", xytext=(0, -10), ha='center', fontsize=8)
+plt.annotate(f'(0, {Wuweihu[-1].values[-1]})', (0, Wuweihu[-1].values[-1]), textcoords="offset points", xytext=(-30, 0), ha='center', fontsize=8)
+
 plt.xlabel('时间'); plt.ylabel('性能')
 #plt.legend()
 plt.savefig('figure/无维护(f+g).png')
@@ -249,8 +269,14 @@ Douwu = []
 for num, segment in enumerate(interval):
     x = data_segments[segment].iloc[:,0]
     Douwu.append(F.Douwu(x, *age_params))
-    plt.scatter(data_segments[segment]['时间'], data_segments[segment]['性能'], label=f'数据集{segment + 1}全部点', color='blue')
+    #plt.scatter(data_segments[segment]['时间'], data_segments[segment]['性能'], label=f'数据集{segment + 1}全部点', color='blue')
     plt.plot(Douwu[num].index[:], Douwu[num].values, label=f'第{segment + 1}段的都无曲线', color='black')
+# 使用虚线画出对应的 x, y 坐标
+plt.plot([Douwu[-1].index[-1], Douwu[-1].index[-1]], [0, Douwu[-1].values[-1]], 'r--', linewidth=1)
+plt.plot([0, Douwu[-1].index[-1]], [Douwu[-1].values[-1], Douwu[-1].values[-1]], 'r--', linewidth=1)
+# 在 x 轴和 y 轴上标注对应坐标
+plt.annotate(f'({Douwu[-1].index[-1]}, 0)', (Douwu[-1].index[-1], 0), textcoords="offset points", xytext=(0, -10), ha='center', fontsize=8)
+plt.annotate(f'(0, {Douwu[-1].values[-1]})', (0, Douwu[-1].values[-1]), textcoords="offset points", xytext=(-30, 0), ha='center', fontsize=8)
 plt.xlabel('时间'); plt.ylabel('性能')
 #plt.legend()
 plt.savefig('figure/都无(f).png')
