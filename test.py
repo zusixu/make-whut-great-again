@@ -188,7 +188,7 @@ for num, segment in enumerate(interval):
 print('h(x)')
 print(h)
 
-# 下面计算11个e(x)
+# 下面计算11个e(x) -- 我们的模型
 # 首先计算f(x-delta_x), 其中delta_x即为前面通过PSO算法求得的回退时间, optimal_t, f为拟合曲线
 # 建立11段曲线的集合
 interval = [0, 1, 2, 3, 4 ,5 ,6, 7, 8, 9, 10]
@@ -197,20 +197,10 @@ interval = [0, 1, 2, 3, 4 ,5 ,6, 7, 8, 9, 10]
 e = []
 for num, segment in enumerate(interval):
     x = data_segments[segment].iloc[:,0]
-    if segment == 3 or segment == 6 or segment == 9 or segment == 10:
-        if segment == 3:
-            e.append(F.f(x, *age_params) + F.gx(x, k_mean[0], data_segments[segment].iloc[0, 0]) - h[segment])
-        elif segment == 6:
-            e.append(F.f(x, *age_params) + F.gx(x, k_mean[1], data_segments[segment].iloc[0, 0]) - h[segment])
-        elif segment == 9:
-            e.append(F.f(x, *age_params) + F.gx(x, k_mean[2], data_segments[segment].iloc[0, 0]) - h[segment])
-        elif segment == 10:
-            e.append(F.f(x, *age_params) + F.gx(x, k_mean[3], data_segments[segment].iloc[0, 0]) - h[segment])
-    else:
-        e.append(F.f(x, *age_params) - h[segment])
-print('e(x)')
-print(e)
-print('===============================================')
+    e.append(F.ex(data_segments, h, segment, x, k_mean, *age_params))
+#print('e(x)')
+#print(e)
+#print('===============================================')
 
 for i, segment in enumerate(interval):
     plt.scatter(data_segments[segment]['时间'], data_segments[segment]['性能'], label=f'数据集{segment + 1}全部点', color='blue')
@@ -218,5 +208,24 @@ for i, segment in enumerate(interval):
 plt.xlabel('时间'); plt.ylabel('性能')
 plt.legend()
 plt.savefig('figure/e(x).png')
+plt.show()
+print('===============================================')
+
+'''print('test')
+x = float(input('请输入x: '))
+segment = int(input('请输入x位于哪一段:')) - 1
+print('预测值为: ', F.ex(data_segments, h, segment, x, k_mean, *age_params))
+print('===============================================')'''
+
+# 下面开始作出无异常值的情况
+Wuyichang = []
+for num, segment in enumerate(interval):
+    x = data_segments[segment].iloc[:,0]
+    Wuyichang.append(F.Wuyichangzhi(h, num, x, *age_params))
+    plt.scatter(data_segments[segment]['时间'], data_segments[segment]['性能'], label=f'数据集{segment + 1}全部点', color='blue')
+    plt.plot(Wuyichang[num].index[:], Wuyichang[num].values, label=f'第{segment + 1}段的无异常曲线', color='black')
+plt.xlabel('时间'); plt.ylabel('性能')
+#plt.legend()
+plt.savefig('figure/无异常(f-2h).png')
 plt.show()
 print('===============================================')
