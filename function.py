@@ -38,14 +38,7 @@ def gx(x, k, x0):
 
 def ex(data_segments, h, segment, x, k_mean, a, b, c, d):
     if segment == 3 or segment == 6 or segment == 9 or segment == 10:
-        if segment == 3:
-            e = F.f(x, a, b, c, d) + F.gx(x, k_mean[0], data_segments[segment].iloc[0, 0]) - h[segment]
-        elif segment == 6:
-            e = F.f(x, a, b, c, d) + F.gx(x, k_mean[1], data_segments[segment].iloc[0, 0]) - h[segment]
-        elif segment == 9:
-            e = F.f(x, a, b, c, d) + F.gx(x, k_mean[2], data_segments[segment].iloc[0, 0]) - h[segment]
-        elif segment == 10:
-            e = F.f(x, a, b, c, d) + F.gx(x, k_mean[3], data_segments[segment].iloc[0, 0]) - h[segment]
+        e = F.f(x, a, b, c, d) + F.gx(x, k_mean[segment], data_segments[segment].iloc[0, 0]) - h[segment]
     else:
         e = F.f(x, a, b, c, d) - h[segment]
 
@@ -55,3 +48,12 @@ def Wuyichangzhi(h, num, x, a, b, c, d):
     wuyichangzhi = F.f(x, a, b, c, d) - h[num]
 
     return wuyichangzhi
+
+def Wuweihu(g, num, x, a, b, c, d):
+    wuweihu = F.f(x, a, b, c, d) + g[num]
+
+    return wuweihu
+
+def Douwu(x, a, b, c, d):
+    douwu = F.f(x, a, b, c, d)
+    return douwu

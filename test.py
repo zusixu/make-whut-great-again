@@ -143,6 +143,7 @@ print('===============================================')
 # 先计算 k原始, 例如: 将第4段的datasize(30)个数的x坐标带入拟合函数中, 计算拟合函数分别在这datasize(30)个座标处的导数值(斜率)
 # 首先针对第4(7, 10, 11)段前30个数据，计算每一个数据在拟合曲线(三次函数)上对应点的导数值(斜率)
 # 第4(7, 10, 11)段, 注意: 我们在前面已经设置好datasize = 30
+interval = [0, 1, 2, 3, 4 ,5 ,6, 7, 8, 9, 10]
 abnormal_data = [3, 6, 9, 10]
 slope_memory = [[] for i in range(len(abnormal_data))]
 for num, segment in enumerate(abnormal_data):
@@ -160,18 +161,18 @@ k7_mean = 1 / (1882 - 1724 + 1 -30) * (coefficients[1][0] * datasize - sum(slope
 k10_mean = 1 / (2734 - 2539 + 1 -30) * (coefficients[2][0] * datasize - sum(slope_memory[2]))
 k11_mean = 1 / (2919 - 2738 + 1 -30) * (coefficients[3][0] * datasize - sum(slope_memory[3]))
 # 将四个k_mean存储到k_mean列表中
-k_mean = [k4_mean, k7_mean, k10_mean, k11_mean]
+k_mean = [0, 0, 0, k4_mean, 0, 0, k7_mean, 0, 0, k10_mean, k11_mean]
 print('四个k_mean')
-print('k4_mean', k_mean[0], 'k7_mean', k_mean[1], 'k10_mean', k_mean[2], 'k11_mean', k_mean[3])
+print('k4_mean', k_mean[3], 'k7_mean', k_mean[6], 'k10_mean', k_mean[9], 'k11_mean', k_mean[10])
 print('===============================================')
 
 # 下面计算 g(x), 公式如'figure/部分计算公式所示.png'所示
 # 先算 g4(x), abnormal_data = [3, 6, 9, 10]
-# 建立g列表
-g = [[] for i in range(len(k_mean))]
-for num, segment in enumerate(abnormal_data):
-    gx = F.gx(data_segments[segment].iloc[:,0], k_mean[num], data_segments[segment].iloc[0,0])
-    g[num].append(gx)
+# 建立g列表, g用来存储每一段最后一点的gx值
+g = []
+for num, segment in enumerate(interval):
+    gx = F.gx(data_segments[segment].iloc[-1,0], sum(k_mean[:segment+1]), data_segments[segment].iloc[0,0])
+    g.append(gx)
 print('g(x)')
 print(g)
 print('===============================================')
@@ -206,7 +207,7 @@ for i, segment in enumerate(interval):
     plt.scatter(data_segments[segment]['时间'], data_segments[segment]['性能'], label=f'数据集{segment + 1}全部点', color='blue')
     plt.plot(e[i].index[:], e[i].values, label=f'第{segment + 1}段的e曲线', color='black')
 plt.xlabel('时间'); plt.ylabel('性能')
-plt.legend()
+# plt.legend()
 plt.savefig('figure/e(x).png')
 plt.show()
 print('===============================================')
@@ -217,7 +218,7 @@ segment = int(input('请输入x位于哪一段:')) - 1
 print('预测值为: ', F.ex(data_segments, h, segment, x, k_mean, *age_params))
 print('===============================================')'''
 
-# 下面开始作出无异常值的情况
+# 下面开始作出无异常的情况
 Wuyichang = []
 for num, segment in enumerate(interval):
     x = data_segments[segment].iloc[:,0]
@@ -226,6 +227,32 @@ for num, segment in enumerate(interval):
     plt.plot(Wuyichang[num].index[:], Wuyichang[num].values, label=f'第{segment + 1}段的无异常曲线', color='black')
 plt.xlabel('时间'); plt.ylabel('性能')
 #plt.legend()
-plt.savefig('figure/无异常(f-2h).png')
+plt.savefig('figure/无异常(f-h).png')
+plt.show()
+print('===============================================')
+
+# 下面开始作出无维护的情况
+Wuweihu = []
+for num, segment in enumerate(interval):
+    x = data_segments[segment].iloc[:,0]
+    Wuweihu.append(F.Wuweihu(g, num, x, *age_params))
+    plt.scatter(data_segments[segment]['时间'], data_segments[segment]['性能'], label=f'数据集{segment + 1}全部点', color='blue')
+    plt.plot(Wuweihu[num].index[:], Wuweihu[num].values, label=f'第{segment + 1}段的无维护曲线', color='black')
+plt.xlabel('时间'); plt.ylabel('性能')
+#plt.legend()
+plt.savefig('figure/无维护(f+g).png')
+plt.show()
+print('===============================================')
+
+# 下面开始作出都无的情况
+Douwu = []
+for num, segment in enumerate(interval):
+    x = data_segments[segment].iloc[:,0]
+    Douwu.append(F.Douwu(x, *age_params))
+    plt.scatter(data_segments[segment]['时间'], data_segments[segment]['性能'], label=f'数据集{segment + 1}全部点', color='blue')
+    plt.plot(Douwu[num].index[:], Douwu[num].values, label=f'第{segment + 1}段的都无曲线', color='black')
+plt.xlabel('时间'); plt.ylabel('性能')
+#plt.legend()
+plt.savefig('figure/都无(f).png')
 plt.show()
 print('===============================================')
