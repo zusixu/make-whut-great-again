@@ -1,8 +1,25 @@
 import pandas as pd
 import numpy as np
 import function as F
+from parameters import Env_parameters
 from scipy.optimize import curve_fit, fsolve
 from numpy.polynomial.polynomial import Polynomial
+
+
+# 超参数设置
+parameters = Env_parameters()
+para = parameters.parse_args()
+# 初始化超参数
+data_path = para.data_path
+figure_path = para.figure_path
+interval = para.interval
+interval_segment = para.interval_segment
+normal_segment = para.normal_segment
+abnormal_segment = para.abnormal_segment
+SLD = para.SLD
+SRW = para.SRW
+MMI = para.MMI
+
 
 # 删除数据中的离群点
 def Remove_outliers(data):
@@ -55,6 +72,14 @@ def ex(data_segments, h, segment, x, k_mean, a, b, c, d):
         e = F.f(x, a, b, c, d) - h[segment]
 
     return e
+
+def derivative_ex(k_mean, backoff_time, x, a, b, c, d):
+    k = 0
+    for i, (start, end) in enumerate(interval_segment, start=1):
+        if start <= x <= end:
+            k = k_mean[i-1]
+            break
+    return k
 
 def Wuyichangx(h, segment, x, a, b, c, d):
     wuyichang = F.f(x, a, b, c, d) - h[segment]

@@ -24,6 +24,7 @@ normal_segment = para.normal_segment
 abnormal_segment = para.abnormal_segment
 SLD = para.SLD
 SRW = para.SRW
+MMI = para.MMI
 
 # ======================================================================================================================
 # ======================================================================================================================
@@ -78,6 +79,8 @@ coefficients = [np.polyfit(segment['时间'], segment['性能'], 1) for segment 
 polys = [np.poly1d(coef) for coef in coefficients]
 print('===================================================')
 print('===================================================')
+# 计算4条线各自斜率之差
+threshold_all = []
 for i, segment in enumerate(abnormal_segment):
     plt.scatter(data_segments[segment]['时间'], data_segments[segment]['性能'], label=f'数据集{segment + 1}全部点', color='blue')
     plt.scatter(local_segments[i]['时间'], local_segments[i]['性能'], label=f'数据集{segment + 1}局部点',
@@ -85,9 +88,11 @@ for i, segment in enumerate(abnormal_segment):
     plt.plot(local_segments[i]['时间'], polys[i](local_segments[i]['时间']), label=f'拟合曲线{segment+1}',
              color='black')
     print(f'清洗后数据集{abnormal_segment[i] + 1}的局部斜率: {coefficients[i][0]}')
+    threshold_all.append(coefficients[i][0] - F.derivative_f(data_segments[segment].iloc[0,0], *age_params))
 plt.xlabel('时间'); plt.ylabel('性能'); plt.legend()
 plt.savefig('figure/在清洗数据后得到的第4_7_10_11段起始点的斜率')
 plt.show()
+print('4条线各自的斜率之差:',threshold_all)
 
 # ======================================================================================================================
 # ======================================================================================================================
@@ -113,23 +118,11 @@ plt.show()
 # 输出导数值
 print('===================================================')
 print('===================================================')
-min_slope = points_slope[0]
 print('拟合曲线在第3, 6, 9, 10段的末尾点的x坐标和斜率分别为:')
 for i, segment in enumerate(abnormal_segment):
     print(f'第{segment}段末尾x坐标 = {points_x[i]}, 第{segment}段末尾斜率 = {points_slope[i]}')
-    if min_slope > points_slope[i]:
-        min_slope = points_slope[i]
-print('斜率阈值:', min_slope)
-
-# 将data_segment中多个dataframe合并
+# 将data_segment中多个dataframe合并为一个dataframe
 data_all = pd.concat(data_segments)
-any_time = float(input())
-for i, segment in enumerate(data_all):
-    slope_RW = [F.derivative_f()]
-    if i < 30:
-        slope_RW =
-    else:
-
 
 
 
@@ -141,18 +134,43 @@ for i, segment in enumerate(data_all):
 # 存储4, 7, 10, 11段上每个x的斜率
 slope_memory = [[] for i in range(len(abnormal_segment))]
 for i, segment in enumerate(abnormal_segment):
-    for num in range(SLD):
+    for num in range(interval_segment[segment][1] - interval_segment[segment][0] + 1 - SLD):
         x = data_segments[segment].iloc[i, 0]
         slope = F.derivative_f(x, *age_params)
         slope_memory[i].append(slope)
 # 下面计算k_mean
 k_mean = [0 for i in range(len(interval_segment))]
 for i, segment in enumerate(abnormal_segment):
-    k_mean[segment] = 1 / (interval_segment[segment][1] - interval_segment[segment][0] + 1 - 30) * (coefficients[i][0] * SLD - sum(slope_memory[i]))
+    k_mean[segment] = 1 / (interval_segment[segment][1] - interval_segment[segment][0] + 1 - SLD) * (coefficients[i][0] * (interval_segment[segment][1] - interval_segment[segment][0] + 1 - SLD) - sum(slope_memory[i]))
 print('===================================================')
 print('===================================================')
 print('k_mean: ', k_mean)
 
+# ======================================================================================================================
+# ======================================================================================================================
+
+# 计算斜率阈值
+# 用平均值作为斜率
+#threshold = np.average(threshold_all[:len(abnormal_segment)])
+# 用最小值作为斜率阈值
+threshold = min(threshold_all)
+print('斜率阈值:', threshold)
+# 设置slope_RW用于存放选取时间节点前30个节点的x坐标在拟合曲线上的斜率
+slope_fx = []
+print('请输入需要判断是否异常的时间节点(整数):')
+any_time = int(input())
+# 设置slope_ex用于存放选取时间节点前30个节点的x坐标在模型e(x)上的斜率
+slope_ex = []
+if any_time < SRW:
+    slope_ex = [F.derivative_ex(k_mean, backoff_time, x, *age_params) for x in range(0,any_time)]
+else:
+    slope_ex = [F.derivative_ex(k_mean, backoff_time, x, *age_params) for x in range(any_time-SRW,any_time)]
+# 筛选出大于斜率阈值min_slope的数据
+slope_ex_1 = [slope_ex[i] for i in range(SRW) if slope_ex[i] > threshold]
+if len(slope_ex_1) >= len(slope_ex)/2:
+    print(f'{any_time}时的机器需要维修')
+else:
+    print(f'{any_time}时的机器正常, 无需维修')
 # ======================================================================================================================
 # ======================================================================================================================
 
