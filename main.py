@@ -186,7 +186,24 @@ for i, segment in enumerate(interval):
     Wuyichang = []
 plt.show()
 
-
+# 下面计算无维护
+Wuweihu = []
+for i, segment in enumerate(interval):
+    x_total = data_segments[segment].iloc[:, 0]
+    # judge用来判断性能是否达到1
+    judge = 0
+    for num, x in enumerate(x_total):
+        Wuweihux = F.Wuweihux(g, segment, num, x, *age_params)
+        Wuweihu.append((x, Wuweihux))
+        if Wuweihux >= 1:
+            judge = 1
+            break
+    curve_x, curve_y = zip(*Wuweihu)
+    plt.plot(curve_x, curve_y, label=f'无维护曲线', color='black')
+    if judge == 1:
+        break
+    Wuweihu = []
+plt.show()
 
 
 

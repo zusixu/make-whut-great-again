@@ -54,8 +54,8 @@ def Wuyichangx(h, segment, x, a, b, c, d):
 
     return wuyichang
 
-def Wuweihux(g, num, x, a, b, c, d):
-    wuweihu = F.f(x, a, b, c, d) + g[num]
+def Wuweihux(g, segment, num, x, a, b, c, d):
+    wuweihu = F.f(x, a, b, c, d) + g[segment].values[num]
 
     return wuweihu
 
