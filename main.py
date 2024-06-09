@@ -56,7 +56,7 @@ plt.scatter(age_x, age_y, label='老化数据(y轴为: 累计维护高度+每段
 plt.plot(age_x_fit, age_y_fit, color='black', label='老化拟合曲线')
 # 添加标签和图例
 plt.xlabel('X'); plt.ylabel('Y'); plt.legend()
-#plt.savefig('figure/123569段数据清洗后拟合性能趋势图')
+plt.savefig('figure/123569段数据清洗后拟合性能趋势图')
 plt.show()
 
 # ======================================================================================================================
@@ -84,7 +84,7 @@ for i, segment in enumerate(abnormal_segment):
              color='black')
     print(f'清洗后数据集{abnormal_segment[i] + 1}的局部斜率: {coefficients[i][0]}')
 plt.xlabel('时间'); plt.ylabel('性能'); plt.legend()
-#plt.savefig('figure/在清洗数据后得到的第4_7_10_11段起始点的斜率')
+plt.savefig('figure/在清洗数据后得到的第4_7_10_11段起始点的斜率')
 plt.show()
 
 # ======================================================================================================================
@@ -105,7 +105,7 @@ for (px, py, slope) in zip(points_x, points_y, points_slope):
     plt.plot(x_range, y_range, color='red')  # 绘制导数直线
 # 添加标签和图例
 plt.xlabel('X'); plt.ylabel('Y'); plt.legend()
-#plt.savefig('figure/123569段数据清洗后拟合性能趋势图_带导数')
+plt.savefig('figure/123569段数据清洗后拟合性能趋势图_带导数')
 plt.show()
 
 # 输出导数值
@@ -136,11 +136,16 @@ print('k_mean: ', k_mean)
 # ======================================================================================================================
 # ======================================================================================================================
 
-# 下面计算g(x)
-g = []
+# 下面计算g1(x)
+g1 = []
 for i, segment in enumerate(interval):
-    gx = F.gx(data_segments[segment].iloc[:, 0], sum(k_mean[:segment + 1]), data_segments[segment].iloc[0, 0])
-    g.append(gx)
+    g1x = F.g1x(data_segments[segment].iloc[:, 0], sum(k_mean[:segment + 1]), data_segments[segment].iloc[0, 0])
+    g1.append(g1x)
+# 下面计算g2(x)
+g2 = []
+for i, segment in enumerate(interval):
+    g2x = F.g2x(g2, segment, data_segments[segment].iloc[:, 0], sum(k_mean[:segment + 1]), data_segments[segment].iloc[0, 0])
+    g2.append(g2x)
 # 下面计算h(x)
 h = []
 for i,  segment in enumerate(interval):
@@ -161,7 +166,7 @@ for i, segment in enumerate(interval):
     #plt.scatter(data_segments[segment]['时间'], data_segments[segment]['性能'], label=f'数据集{segment + 1}全部点', color='blue')
     plt.plot(e[i].index[:], e[i].values, label=f'第{segment + 1}段的e曲线', color='black')
 plt.xlabel('时间'); plt.ylabel('性能'); plt.legend()
-#plt.savefig('figure/e(x).png')
+plt.savefig('figure/模型e(x).png')
 plt.show()
 
 # ======================================================================================================================
@@ -184,6 +189,12 @@ for i, segment in enumerate(interval):
     curve_x, curve_y = zip(*Wuyichang)
     plt.plot(curve_x, curve_y, label=f'无异常曲线', color='black')
     Wuyichang = []
+# 使用虚线画出对应的 x, y 坐标
+plt.plot([curve_x[-1], curve_x[-1]], [0, curve_y[-1]], 'r--', linewidth=1)
+plt.plot([0, curve_x[-1]], [curve_y[-1], curve_y[-1]], 'r--', linewidth=1)
+plt.annotate(f'({curve_x[-1]}, 0)', (curve_x[-1], 0), textcoords="offset points", xytext=(0, -10), ha='center', fontsize=8)
+plt.annotate(f'(0, {curve_y[-1]})', (0, curve_y[-1]), textcoords="offset points", xytext=(-30, 0), ha='center', fontsize=8)
+plt.savefig('figure/无异常')
 plt.show()
 
 # 下面计算无维护
@@ -193,7 +204,7 @@ for i, segment in enumerate(interval):
     # judge用来判断性能是否达到1
     judge = 0
     for num, x in enumerate(x_total):
-        Wuweihux = F.Wuweihux(g, segment, num, x, *age_params)
+        Wuweihux = F.Wuweihux(g2, segment, num, x, *age_params)
         Wuweihu.append((x, Wuweihux))
         if Wuweihux >= 1:
             judge = 1
@@ -203,7 +214,39 @@ for i, segment in enumerate(interval):
     if judge == 1:
         break
     Wuweihu = []
+# 使用虚线画出对应的 x, y 坐标
+plt.plot([curve_x[-1], curve_x[-1]], [0, curve_y[-1]], 'r--', linewidth=1)
+plt.plot([0, curve_x[-1]], [curve_y[-1], curve_y[-1]], 'r--', linewidth=1)
+plt.annotate(f'({curve_x[-1]}, 0)', (curve_x[-1], 0), textcoords="offset points", xytext=(0, -10), ha='center', fontsize=8)
+plt.annotate(f'(0, {curve_y[-1]})', (0, curve_y[-1]), textcoords="offset points", xytext=(-30, 0), ha='center', fontsize=8)
+plt.savefig('figure/无维护')
 plt.show()
 
+# 下面计算都无
+Douwu = []
+for i, segment in enumerate(interval):
+    x_total = data_segments[segment].iloc[:, 0]
+    # judge用来判断性能是否达到1
+    judge = 0
+    for num, x in enumerate(x_total):
+        Douwux = F.Douwux(x, *age_params)
+        Douwu.append((x, Douwux))
+        if Douwux >= 1:
+            judge = 1
+            break
+    curve_x, curve_y = zip(*Douwu)
+    plt.plot(curve_x, curve_y, label=f'无维护曲线', color='black')
+    if judge == 1:
+        break
+    Douwu = []
+# 使用虚线画出对应的 x, y 坐标
+plt.plot([curve_x[-1], curve_x[-1]], [0, curve_y[-1]], 'r--', linewidth=1)
+plt.plot([0, curve_x[-1]], [curve_y[-1], curve_y[-1]], 'r--', linewidth=1)
+plt.annotate(f'({curve_x[-1]}, 0)', (curve_x[-1], 0), textcoords="offset points", xytext=(0, -10), ha='center', fontsize=8)
+plt.annotate(f'(0, {curve_y[-1]})', (0, curve_y[-1]), textcoords="offset points", xytext=(-30, 0), ha='center', fontsize=8)
+plt.savefig('figure/都无')
+plt.show()
 
+# ======================================================================================================================
+# ======================================================================================================================
 

@@ -33,8 +33,15 @@ def pso_goal(t, x_value, delta_y, a, b, c, d):
     return g_val
 
 # 定义函数gx
-def gx(x, k, x0):
-    return k * (x - x0)
+def g1x(x, k, x0):
+    g1x = k * (x - x0)
+    return g1x
+
+def g2x(g2, segment, x, k, x0):
+    g2x = k * (x - x0)
+    if segment != 0:
+        g2x = g2x + g2[segment-1].values[-1] + g2x.values[0]
+    return g2x
 
 def hx(segment, backoff_time, h, x, a, b, c, d):
     hx = F.f(x, a, b, c, d) - F.f(x - backoff_time, a, b, c, d) + h[segment - 1]
@@ -43,7 +50,7 @@ def hx(segment, backoff_time, h, x, a, b, c, d):
 
 def ex(data_segments, h, segment, x, k_mean, a, b, c, d):
     if segment == 3 or segment == 6 or segment == 9 or segment == 10:
-        e = F.f(x, a, b, c, d) + F.gx(x, k_mean[segment], data_segments[segment].iloc[0, 0]) - h[segment]
+        e = F.f(x, a, b, c, d) + F.g1x(x, k_mean[segment], data_segments[segment].iloc[0, 0]) - h[segment]
     else:
         e = F.f(x, a, b, c, d) - h[segment]
 
