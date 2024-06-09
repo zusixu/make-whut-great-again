@@ -16,6 +16,8 @@ class Env_parameters():
                             help='Segments use for computing k_mean')
         parser.add_argument('--SLD', type=int, default=30,
                             help='Size of local data  for fitting k_mean model ')
+        parser.add_argument('--SRW', type=int, default=30,
+                            help='Size of rolling window')
 
 
         return parser.parse_args()

@@ -40,7 +40,7 @@ def g1x(x, k, x0):
 def g2x(g2, segment, x, k, x0):
     g2x = k * (x - x0)
     if segment != 0:
-        g2x = g2x + g2[segment-1].values[-1] + g2x.values[0]
+        g2x = g2x + g2[segment-1].values[-1] - g2x.values[0]
     return g2x
 
 def hx(segment, backoff_time, h, x, a, b, c, d):

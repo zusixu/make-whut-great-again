@@ -23,6 +23,7 @@ interval_segment = para.interval_segment
 normal_segment = para.normal_segment
 abnormal_segment = para.abnormal_segment
 SLD = para.SLD
+SRW = para.SRW
 
 # ======================================================================================================================
 # ======================================================================================================================
@@ -68,6 +69,7 @@ lb = [0]; ub = [1000]
 delta_x = [data_segments[i].iloc[0, 0] for i in normal_segment[1:6]]
 delta_y = [data_segments[i].iloc[-1, 1] - data_segments[i + 1].iloc[0, 1] for i in normal_segment[0:5]]
 backoff_time, backoff_error = pso(lambda t: F.pso_goal(t, delta_x, delta_y, *age_params), lb, ub)
+print('回退时间', backoff_time, '回退误差', backoff_error)
 
 
 # 拟合异常数据段的斜率(4, 7, 10, 11)
@@ -111,9 +113,27 @@ plt.show()
 # 输出导数值
 print('===================================================')
 print('===================================================')
+min_slope = points_slope[0]
 print('拟合曲线在第3, 6, 9, 10段的末尾点的x坐标和斜率分别为:')
 for i, segment in enumerate(abnormal_segment):
     print(f'第{segment}段末尾x坐标 = {points_x[i]}, 第{segment}段末尾斜率 = {points_slope[i]}')
+    if min_slope > points_slope[i]:
+        min_slope = points_slope[i]
+print('斜率阈值:', min_slope)
+
+# 将data_segment中多个dataframe合并
+data_all = pd.concat(data_segments)
+any_time = float(input())
+for i, segment in enumerate(data_all):
+    slope_RW = [F.derivative_f()]
+    if i < 30:
+        slope_RW =
+    else:
+
+
+
+
+
 
 # ======================================================================================================================
 # ======================================================================================================================
@@ -139,7 +159,7 @@ print('k_mean: ', k_mean)
 # 下面计算g1(x)
 g1 = []
 for i, segment in enumerate(interval):
-    g1x = F.g1x(data_segments[segment].iloc[:, 0], sum(k_mean[:segment + 1]), data_segments[segment].iloc[0, 0])
+    g1x = F.g1x(data_segments[segment].iloc[:, 0], k_mean[segment], data_segments[segment].iloc[0, 0])
     g1.append(g1x)
 # 下面计算g2(x)
 g2 = []
