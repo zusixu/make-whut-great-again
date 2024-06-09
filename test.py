@@ -229,9 +229,14 @@ print('===============================================')'''
 Wuyichang = []
 for num, segment in enumerate(interval):
     x = data_segments[segment].iloc[:,0]
-    Wuyichang.append(F.Wuyichangzhi(h, num, x, *age_params))
+    for i, item in enumerate(x):
+        Wuyichang.append(F.Wuyichangzhi(h, num, item, *age_params))
+        if Wuyichang[-1] >= 1:
+            judge = 1
+            break
     #plt.scatter(data_segments[segment]['时间'], data_segments[segment]['性能'], label=f'数据集{segment + 1}全部点', color='blue')
     plt.plot(Wuyichang[num].index[:], Wuyichang[num].values, label=f'第{segment + 1}段的无异常曲线', color='black')
+
 # 使用虚线画出对应的 x, y 坐标
 plt.plot([Wuyichang[-1].index[-1], Wuyichang[-1].index[-1]], [0, Wuyichang[-1].values[-1]], 'r--', linewidth=1)
 plt.plot([0, Wuyichang[-1].index[-1]], [Wuyichang[-1].values[-1], Wuyichang[-1].values[-1]], 'r--', linewidth=1)

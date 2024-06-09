@@ -36,6 +36,11 @@ def pso_goal(t, x_value, delta_y, a, b, c, d):
 def gx(x, k, x0):
     return k * (x - x0)
 
+def hx(segment, backoff_time, h, x, a, b, c, d):
+    hx = F.f(x, a, b, c, d) - F.f(x - backoff_time, a, b, c, d) + h[segment - 1]
+    return hx
+
+
 def ex(data_segments, h, segment, x, k_mean, a, b, c, d):
     if segment == 3 or segment == 6 or segment == 9 or segment == 10:
         e = F.f(x, a, b, c, d) + F.gx(x, k_mean[segment], data_segments[segment].iloc[0, 0]) - h[segment]
@@ -44,16 +49,16 @@ def ex(data_segments, h, segment, x, k_mean, a, b, c, d):
 
     return e
 
-def Wuyichangzhi(h, num, x, a, b, c, d):
-    wuyichangzhi = F.f(x, a, b, c, d) - h[num]
+def Wuyichangx(h, segment, x, a, b, c, d):
+    wuyichang = F.f(x, a, b, c, d) - h[segment]
 
-    return wuyichangzhi
+    return wuyichang
 
-def Wuweihu(g, num, x, a, b, c, d):
+def Wuweihux(g, num, x, a, b, c, d):
     wuweihu = F.f(x, a, b, c, d) + g[num]
 
     return wuweihu
 
-def Douwu(x, a, b, c, d):
+def Douwux(x, a, b, c, d):
     douwu = F.f(x, a, b, c, d)
     return douwu
