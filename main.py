@@ -7,6 +7,7 @@ from scipy.optimize import curve_fit
 from pyswarm import pso
 import pyswarms as ps
 from parameters import Env_parameters
+from pyswarms.utils.plotters import plot_cost_history
 # 设置字体
 from pylab import mpl
 mpl.rcParams['font.sans-serif'] = ['SimHei']
@@ -317,7 +318,8 @@ print('e1(x) = g(x,T) + f(x,T) + h(x,T)与y=1交点的横坐标为: ', x)
 # t的下界与上界（根据实际情况调整）
 def pso_goal2(T):
     num = 0
-    for i in range(n-1):
+    T_sorted = np.sort(T)  # 确保 T 是有序的，以计算相邻点的距离
+    for i in range(len(T_sorted) - 1):
         if np.any(T[i+1] - T[i] > min_dis):
             num += 1
     return num * 200 -x
@@ -336,6 +338,13 @@ print('===================================================')
 print('最佳维护时间:')
 best_T = np.sort(best_T)
 print(best_T)
+# 画出粒子群迭代函数图
+plot_cost_history(optimizer.cost_history)
+plt.title('Cost History')
+plt.xlabel('Iterations')
+plt.ylabel('Cost')
+plt.savefig('figure/cost_history.png')
+plt.show()
 
 # =================================================================================
 # =================================================================================

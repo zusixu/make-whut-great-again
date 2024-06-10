@@ -1,5 +1,7 @@
 import numpy as np
 import pyswarms as ps
+from pyswarms.utils.plotters import plot_cost_history
+import matplotlib.pyplot as plt
 
 # 定义目标函数
 def pso_goal(T):
@@ -30,3 +32,10 @@ best_T, best_cost = optimizer.optimize(fitness_function, iters=100)
 
 print("最优解:", best_T)
 print("最优解的目标函数值:", best_cost)
+
+# 画出粒子群迭代函数图
+plot_cost_history(optimizer.cost_history)
+plt.title('Cost History')
+plt.xlabel('Iterations')
+plt.ylabel('Cost')
+plt.show()
