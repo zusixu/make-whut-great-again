@@ -73,9 +73,9 @@ def h2x(T, backoff_time, x, a, b, c, d):
     for i, segment in enumerate(T):
         if x > segment:
             if segment > backoff_time:
-                hx2 = h2x - (F.f(segment, a, b, c, d) - F.f(segment - backoff_time, a, b, c, d))
+                h2x = h2x - (F.f(segment, a, b, c, d) - F.f(segment - backoff_time, a, b, c, d))
             else:
-                hx2 = h2x - F.f(segment, a, b, c, d)
+                h2x = h2x - F.f(segment, a, b, c, d)
     return h2x
 def ex(data_segments, h, segment, x, k_mean, a, b, c, d):
     if segment == 3 or segment == 6 or segment == 9 or segment == 10:
