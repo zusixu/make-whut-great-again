@@ -1,6 +1,7 @@
 import pandas as pd
 import numpy as np
 import matplotlib.pyplot as plt
+import random
 import function as F
 from scipy.optimize import curve_fit
 from pyswarm import pso
@@ -25,6 +26,8 @@ abnormal_segment = para.abnormal_segment
 SLD = para.SLD
 SRW = para.SRW
 MMI = para.MMI
+MTE = para.MTE
+min_dis = para.min_dis
 
 # ======================================================================================================================
 # ======================================================================================================================
@@ -59,7 +62,7 @@ plt.plot(age_x_fit, age_y_fit, color='black', label='老化拟合曲线')
 # 添加标签和图例
 plt.xlabel('X'); plt.ylabel('Y'); plt.legend()
 plt.savefig('figure/123569段数据清洗后拟合性能趋势图')
-plt.show()
+#plt.show()
 
 # ======================================================================================================================
 # ======================================================================================================================
@@ -91,7 +94,7 @@ for i, segment in enumerate(abnormal_segment):
     threshold_all.append(coefficients[i][0] - F.derivative_f(data_segments[segment].iloc[0,0], *age_params))
 plt.xlabel('时间'); plt.ylabel('性能'); plt.legend()
 plt.savefig('figure/在清洗数据后得到的第4_7_10_11段起始点的斜率')
-plt.show()
+#plt.show()
 print('4条线各自的斜率之差:',threshold_all)
 
 # ======================================================================================================================
@@ -113,7 +116,7 @@ for (px, py, slope) in zip(points_x, points_y, points_slope):
 # 添加标签和图例
 plt.xlabel('X'); plt.ylabel('Y'); plt.legend()
 plt.savefig('figure/123569段数据清洗后拟合性能趋势图_带导数')
-plt.show()
+#plt.show()
 
 # 输出导数值
 print('===================================================')
@@ -171,6 +174,7 @@ if len(slope_ex_1) >= len(slope_ex)/2:
     print(f'{any_time}时的机器需要维修')
 else:
     print(f'{any_time}时的机器正常, 无需维修')
+
 # ======================================================================================================================
 # ======================================================================================================================
 
@@ -205,7 +209,7 @@ for i, segment in enumerate(interval):
     plt.plot(e[i].index[:], e[i].values, label=f'第{segment + 1}段的e曲线', color='black')
 plt.xlabel('时间'); plt.ylabel('性能'); plt.legend()
 plt.savefig('figure/模型e(x).png')
-plt.show()
+#plt.show()
 
 # ======================================================================================================================
 # ======================================================================================================================
@@ -233,7 +237,7 @@ plt.plot([0, curve_x[-1]], [curve_y[-1], curve_y[-1]], 'r--', linewidth=1)
 plt.annotate(f'({curve_x[-1]}, 0)', (curve_x[-1], 0), textcoords="offset points", xytext=(0, -10), ha='center', fontsize=8)
 plt.annotate(f'(0, {curve_y[-1]})', (0, curve_y[-1]), textcoords="offset points", xytext=(-30, 0), ha='center', fontsize=8)
 plt.savefig('figure/无异常')
-plt.show()
+#plt.show()
 
 # 下面计算无维护
 Wuweihu = []
@@ -258,7 +262,7 @@ plt.plot([0, curve_x[-1]], [curve_y[-1], curve_y[-1]], 'r--', linewidth=1)
 plt.annotate(f'({curve_x[-1]}, 0)', (curve_x[-1], 0), textcoords="offset points", xytext=(0, -10), ha='center', fontsize=8)
 plt.annotate(f'(0, {curve_y[-1]})', (0, curve_y[-1]), textcoords="offset points", xytext=(-30, 0), ha='center', fontsize=8)
 plt.savefig('figure/无维护')
-plt.show()
+#plt.show()
 
 # 下面计算都无
 Douwu = []
@@ -283,8 +287,27 @@ plt.plot([0, curve_x[-1]], [curve_y[-1], curve_y[-1]], 'r--', linewidth=1)
 plt.annotate(f'({curve_x[-1]}, 0)', (curve_x[-1], 0), textcoords="offset points", xytext=(0, -10), ha='center', fontsize=8)
 plt.annotate(f'(0, {curve_y[-1]})', (0, curve_y[-1]), textcoords="offset points", xytext=(-30, 0), ha='center', fontsize=8)
 plt.savefig('figure/都无')
+#plt.show()
+
+# 利用pso算法求解最优维护次数
+# t的下界与上界（根据实际情况调整）
+print('请输入时间x: ')
+x = int(input())
+# 19 = 2926/158, 4是异常次数
+T = F.generate_random_points(random.randint(10, 15))
+if T[0] != 0:
+    T.insert(0,0)
+if T[-1] != 5000:
+    T.append(5000)
+lb = [0 for i in range(len(T))]; ub = [5000 for i in range(len(T))]
+best_T, min_error = pso(lambda T: F.pso_goal2(T, x, k_mean, backoff_time, *age_params), lb, ub)
+print('最佳维护时间:')
+print(best_T)
 plt.show()
 
-# ======================================================================================================================
-# ======================================================================================================================
-
+for i in range(0, 5000):
+    max_life = 0
+    if F.pso_goal2(best_T, i, k_mean, backoff_time, *age_params) >= 1:
+        max_life = i
+        break
+print(max_life)

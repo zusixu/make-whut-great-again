@@ -24,8 +24,9 @@ class Env_parameters():
                             help='Size of rolling window')
         parser.add_argument('--MMI', type=int, default=200,
                             help='Minimum maintenance interval(最小维护时间间隔)')
-        parser.add_argument('--MTR', type=int, default=30,
-                            help='Maintenance Time Range(维护时间范围)')
-
+        parser.add_argument('--MTE', type=int, default=30,
+                            help='Maintenance time error(维护时间误差)')
+        parser.add_argument('--min_dis', type=int, default=158,
+                            help='间隔之间最小距离')
 
         return parser.parse_args()
