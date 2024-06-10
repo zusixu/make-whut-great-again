@@ -20,6 +20,8 @@ abnormal_segment = para.abnormal_segment
 SLD = para.SLD
 SRW = para.SRW
 MMI = para.MMI
+MTE = para.MTE
+min_dis = para.min_dis
 
 
 # 删除数据中的离群点
@@ -70,7 +72,10 @@ def h2x(T, backoff_time, x, a, b, c, d):
     h2x = 0
     for i, segment in enumerate(T):
         if x > segment:
-            hx2 = h2x - (F.f(x, a, b, c, d) - F.f(x - backoff_time, a, b, c, d))
+            if segment > backoff_time:
+                hx2 = h2x - (F.f(segment, a, b, c, d) - F.f(segment - backoff_time, a, b, c, d))
+            else:
+                hx2 = h2x - F.f(segment, a, b, c, d)
     return h2x
 def ex(data_segments, h, segment, x, k_mean, a, b, c, d):
     if segment == 3 or segment == 6 or segment == 9 or segment == 10:
@@ -110,27 +115,44 @@ def find_interval(points, value):
     for i in range(len(points) - 1):
         if points[i] <= value < points[i + 1]:
             return points[i], points[i+1]
-    return 5000, 5000
-
+    return 0,0
 def find_interval2(points, value):
     for i in range(len(points) - 1):
-        if points[i][0] <= value < points[i][1]:
+        if points[i][0] <= value <= points[i][1]:
             return points[i][0]
-    return points[-1][1]
+    a=1
+    return 0
 
-def g_val2(T, k, backoff_time, t_i0, x, a, b, c, d):
-    return F.g1x(x, k, t_i0) + F.f(x, a, b, c, d) + h2x(T, backoff_time, x, a, b, c, d)
+def g_val2(T, k, backoff_time, t_i0, x_i0, x, a, b, c, d):
+    return F.g1x(x, k, max(t_i0, x_i0)) + F.f(x, a, b, c, d) + h2x(T, backoff_time, x, a, b, c, d)
 
-def pso_goal2(T, x, k_mean, backoff_time, a ,b, c, d):
+def interval_generate(n):
+    # 先生成 1 到 5000 之间的 10 个不同的随机数
+    random_numbers = random.sample(range(1, 5001), n)
+    # 从小到大排序
+    sorted_numbers = sorted(random_numbers)
+    # 计算相邻点之间的差值
+    differences = [sorted_numbers[i + 1] - sorted_numbers[i] for i in range(len(sorted_numbers) - 1)]
+
+    return sorted_numbers, differences
+
+
+def e1x(T, x, k_mean, backoff_time, a ,b, c, d):
     t_i0, t_i1 = F.find_interval(T, x)
     x_i0 = F.find_interval2(interval_segment, x)
     k = 0
-    if x_i0 == 860 or x_i0 == 1724 or x_i0 == 2539 or x_i0 == 2738:
-        if x_i0 == 860: k = k_mean[3]
-        elif x_i0 == 1724: k = k_mean[6]
-        elif x_i0 == 2539: k = k_mean[10]
+    if 860<=x_i0<= 1018 or 1724<=x_i0<= 1882 or 2539<=x_i0<=2734 or 2738<=x_i0<=2919:
+        if 860<=x_i0<= 1018: k = k_mean[3]
+        elif 1724<=x_i0<= 1882: k = k_mean[6]
+        elif 2539<=x_i0<=2734: k = k_mean[9]
         else: k = k_mean[10]
-    t_i0 = max(t_i0, x_i0)
-    g_val2 = F.g_val2(T, k, backoff_time, t_i0, x, a, b, c, d)
+    g_val2 = F.g_val2(T, k, backoff_time, t_i0, x_i0, x, a, b, c, d)
 
     return g_val2
+
+def pso_goal2(T, n, x):
+    num = 0
+    for i in range(n-1):
+        if np.any(T[i+1] - T[i] > min_dis):
+            num += 1
+    return num * 200 - x

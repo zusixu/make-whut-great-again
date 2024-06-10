@@ -5,6 +5,7 @@ import random
 import function as F
 from scipy.optimize import curve_fit
 from pyswarm import pso
+import pyswarms as ps
 from parameters import Env_parameters
 # 设置字体
 from pylab import mpl
@@ -290,24 +291,37 @@ plt.savefig('figure/都无')
 #plt.show()
 
 # 利用pso算法求解最优维护次数
+# 给出确定的维修的点的个数
+n = 10
+# 计算生成的维修时间, 以及各个时间节点之差
+T, T_length = F.interval_generate(n)
+x = 0
+for i in range(5000):
+    # e1(x) = g(x,T) + + f(x,T) + h(x,T)与y=1交点的横坐标
+    if F.e1x(T, i, k_mean, backoff_time, *age_params) >= 1:
+        x = i
+        break
+print('e1(x) = g(x,T) + f(x,T) + h(x,T)与y=1交点的横坐标为: ', x)
+
+# =================================================================================
+# =================================================================================
+
 # t的下界与上界（根据实际情况调整）
-print('请输入时间x: ')
-x = int(input())
-# 19 = 2926/158, 4是异常次数
-T = F.generate_random_points(random.randint(10, 15))
-if T[0] != 0:
-    T.insert(0,0)
-if T[-1] != 5000:
-    T.append(5000)
-lb = [0 for i in range(len(T))]; ub = [5000 for i in range(len(T))]
-best_T, min_error = pso(lambda T: F.pso_goal2(T, x, k_mean, backoff_time, *age_params), lb, ub)
+def pso_goal2(T):
+    num = 0
+    for i in range(n-1):
+        if np.any(T[i+1] - T[i] > min_dis):
+            num += 1
+    return num * 200 -x
+def fitness_function(T):
+    return pso_goal2(T),
+
+lb = [0 for i in range(n)]; ub = [x for i in range(n)]
+dimensions = n; n_particles = 10
+# 设置PSO算法的参数
+options = {'c1': 0.5, 'c2': 0.3, 'w':0.9}
+optimizer = ps.single.GlobalBestPSO(n_particles=n_particles, dimensions=dimensions, bounds=(lb, ub), options=options)
+best_solution, best_T = optimizer.optimize(fitness_function, iters=100)
+
 print('最佳维护时间:')
 print(best_T)
-plt.show()
-
-for i in range(0, 5000):
-    max_life = 0
-    if F.pso_goal2(best_T, i, k_mean, backoff_time, *age_params) >= 1:
-        max_life = i
-        break
-print(max_life)

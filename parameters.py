@@ -27,6 +27,6 @@ class Env_parameters():
         parser.add_argument('--MTE', type=int, default=30,
                             help='Maintenance time error(维护时间误差)')
         parser.add_argument('--min_dis', type=int, default=158,
-                            help='间隔之间最小距离')
+                            help='原始数据所有维护间隔中的最小距离')
 
         return parser.parse_args()
